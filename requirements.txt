@@ -1,0 +1,5 @@
+# This project uses only the Python standard library.
+# tkinter is included with most Python desktop installations.
+#
+# Recommended Python version:
+# Python 3.10 or newer
