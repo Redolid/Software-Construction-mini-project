@@ -23,6 +23,7 @@ This repository starts as a playable scaffold. Teammates should still create fea
 - The player selects two face-down cards at a time.
 - Matching cards stay face-up.
 - Non-matching cards flip back face-down.
+- The game tracks how many moves the player has used.
 - The game ends successfully when all pairs are matched.
 
 ## Technology

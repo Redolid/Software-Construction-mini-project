@@ -12,6 +12,7 @@ Requirements covered in this file:
 - matching cards stay face-up.
 - non-matching cards flip back face-down.
 - success and game-over messages are shown.
+- player can see how many pair attempts they have made.
 
 Suggested teammate owner:
 - feature/ui branch for layout and controls.
@@ -48,11 +49,13 @@ class MemoryScrambleGame:
         self.timeout_var = tk.StringVar(value="60")
         self.status_var = tk.StringVar(value="Configure the game and press Start.")
         self.timer_var = tk.StringVar(value="Time: 60")
+        self.moves_var = tk.StringVar(value="Moves: 0")
 
         self.board: list[list[str]] = []
         self.buttons: list[list[tk.Button]] = []
         self.flipped_cards: list[tuple[int, int]] = []
         self.matched_cards: set[tuple[int, int]] = set()
+        self.moves_count = 0
         self.waiting_to_hide_cards = False
         self.game_active = False
         self.timer: CountdownTimer | None = None
@@ -88,7 +91,10 @@ class MemoryScrambleGame:
         tk.Label(info_frame, textvariable=self.timer_var, font=("Arial", 12, "bold")).grid(
             row=0, column=0, sticky="w"
         )
-        tk.Label(info_frame, textvariable=self.status_var).grid(row=0, column=1, padx=16)
+        tk.Label(info_frame, textvariable=self.moves_var, font=("Arial", 12, "bold")).grid(
+            row=0, column=1, padx=12
+        )
+        tk.Label(info_frame, textvariable=self.status_var).grid(row=0, column=2, padx=16)
 
         self.board_frame = tk.Frame(self.root, padx=12, pady=12)
         self.board_frame.grid(row=2, column=0)
@@ -112,6 +118,8 @@ class MemoryScrambleGame:
         self.board = generate_board(rows, columns)
         self.flipped_cards = []
         self.matched_cards = set()
+        self.moves_count = 0
+        self._update_moves_label()
         self.waiting_to_hide_cards = False
         self.game_active = True
 
@@ -161,6 +169,8 @@ class MemoryScrambleGame:
         self.flipped_cards.append(position)
 
         if len(self.flipped_cards) == 2:
+            self.moves_count += 1
+            self._update_moves_label()
             self._check_selected_pair()
 
     def _check_selected_pair(self) -> None:
@@ -188,7 +198,10 @@ class MemoryScrambleGame:
             if self.timer is not None:
                 self.timer.stop()
             self.status_var.set("You matched all pairs.")
-            messagebox.showinfo("You Win", "Congratulations! You matched all pairs.")
+            messagebox.showinfo(
+                "You Win",
+                f"Congratulations! You matched all pairs in {self.moves_count} moves.",
+            )
 
     def _hide_unmatched_cards(self) -> None:
         for row, column in self.flipped_cards:
@@ -213,6 +226,9 @@ class MemoryScrambleGame:
 
     def _update_timer_label(self, remaining_seconds: int) -> None:
         self.timer_var.set(f"Time: {remaining_seconds}")
+
+    def _update_moves_label(self) -> None:
+        self.moves_var.set(f"Moves: {self.moves_count}")
 
     def _handle_timeout(self) -> None:
         if not self.game_active:
