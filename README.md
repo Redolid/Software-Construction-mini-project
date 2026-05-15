@@ -24,6 +24,7 @@ This repository starts as a playable scaffold. Teammates should still create fea
 - Matching cards stay face-up.
 - Non-matching cards flip back face-down.
 - Cards use different visual states for hidden, selected, matched, and disabled.
+- The game tracks how many moves the player has used.
 - The game ends successfully when all pairs are matched.
 
 ## Technology
