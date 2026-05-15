@@ -23,6 +23,7 @@ This repository starts as a playable scaffold. Teammates should still create fea
 - The player selects two face-down cards at a time.
 - Matching cards stay face-up.
 - Non-matching cards flip back face-down.
+- Cards use different visual states for hidden, selected, matched, and disabled.
 - The game ends successfully when all pairs are matched.
 
 ## Technology
@@ -35,15 +36,15 @@ This repository starts as a playable scaffold. Teammates should still create fea
 
 ```text
 memory-scramble-game/
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── game.py
-│   ├── board.py
-│   └── timer.py
-├── README.md
-├── requirements.txt
-└── .gitignore
++-- src/
+|   +-- __init__.py
+|   +-- main.py
+|   +-- game.py
+|   +-- board.py
+|   +-- timer.py
++-- README.md
++-- requirements.txt
++-- .gitignore
 ```
 
 ## File Responsibilities
@@ -122,6 +123,7 @@ Suggested branches:
 - `main`: stable final version
 - `dev`: integration branch
 - `feature/ui`: tkinter layout and board buttons
+- `feature/ui-game-flow`: UI states, card matching polish, and game flow review
 - `feature/game-logic`: board generation and matching rules
 - `feature/timer-config`: timeout input and countdown behavior
 
