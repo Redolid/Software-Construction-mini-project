@@ -33,6 +33,10 @@ except ImportError:
 
 CARD_BACK_TEXT = "?"
 FLIP_BACK_DELAY_MS = 700
+CARD_HIDDEN_BG = "#e8edf3"
+CARD_FACE_UP_BG = "#fff5c4"
+CARD_MATCHED_BG = "#c9f2d1"
+CARD_DISABLED_BG = "#dddddd"
 
 
 class MemoryScrambleGame:
@@ -140,6 +144,9 @@ class MemoryScrambleGame:
                     width=6,
                     height=3,
                     font=("Arial", 16, "bold"),
+                    bg=CARD_HIDDEN_BG,
+                    activebackground=CARD_HIDDEN_BG,
+                    disabledforeground="black",
                     command=lambda r=row, c=column: self.select_card(r, c),
                 )
                 button.grid(row=row, column=column, padx=4, pady=4)
@@ -172,6 +179,7 @@ class MemoryScrambleGame:
 
         if first_symbol == second_symbol:
             self.matched_cards.update(self.flipped_cards)
+            self._mark_matched_cards()
             self.flipped_cards = []
             self.status_var.set("Match found.")
             self._check_for_win()
@@ -202,6 +210,8 @@ class MemoryScrambleGame:
             text=self.board[row][column],
             state=tk.DISABLED,
             relief=tk.SUNKEN,
+            bg=CARD_FACE_UP_BG,
+            activebackground=CARD_FACE_UP_BG,
         )
 
     def _hide_card(self, row: int, column: int) -> None:
@@ -209,7 +219,18 @@ class MemoryScrambleGame:
             text=CARD_BACK_TEXT,
             state=tk.NORMAL,
             relief=tk.RAISED,
+            bg=CARD_HIDDEN_BG,
+            activebackground=CARD_HIDDEN_BG,
         )
+
+    def _mark_matched_cards(self) -> None:
+        for row, column in self.flipped_cards:
+            self.buttons[row][column].config(
+                state=tk.DISABLED,
+                relief=tk.SUNKEN,
+                bg=CARD_MATCHED_BG,
+                activebackground=CARD_MATCHED_BG,
+            )
 
     def _update_timer_label(self, remaining_seconds: int) -> None:
         self.timer_var.set(f"Time: {remaining_seconds}")
@@ -226,4 +247,6 @@ class MemoryScrambleGame:
     def _disable_all_cards(self) -> None:
         for row in self.buttons:
             for button in row:
+                if button["text"] == CARD_BACK_TEXT:
+                    button.config(bg=CARD_DISABLED_BG, activebackground=CARD_DISABLED_BG)
                 button.config(state=tk.DISABLED)
