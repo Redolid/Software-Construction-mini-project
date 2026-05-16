@@ -212,7 +212,7 @@ class MemoryScrambleGame:
                     relief=tk.RAISED,
                     command=lambda r=row, c=col: self.select_card(r, c),
                 )
-                self.buttons[row][col].grid(row=row, column=col, padx=4, pady=4)
+                self.buttons[row][col].grid(row=row, column=col, padx=8, pady=8)
 
         # Store current active size so select_card works correctly
         self._active_rows = rows
