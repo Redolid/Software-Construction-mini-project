@@ -46,14 +46,12 @@ class MemoryScrambleGame:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Memory Scramble Game")
-        self.root.resizable(False, False)
+        self.root.geometry("1100x650")
+        self.root.minsize(1100, 650)
 
-        self.rows_var = tk.StringVar(value="4")
-        self.columns_var = tk.StringVar(value="4")
-        self.timeout_var = tk.StringVar(value="60")
-        self.status_var = tk.StringVar(value="Configure the game and press Start.")
-        self.timer_var = tk.StringVar(value="Time: 60")
-        self.moves_var = tk.StringVar(value="Moves: 0")
+        self.rows_val = 4
+        self.columns_val = 4
+        self.timeout_val = 60
 
         self.board: list[list[str]] = []
         self.buttons: list[list[tk.Button]] = []
@@ -63,6 +61,7 @@ class MemoryScrambleGame:
         self.waiting_to_hide_cards = False
         self.game_active = False
         self.timer: CountdownTimer | None = None
+        self._flip_back_job: str | None = None
 
         self._build_layout()
 
@@ -70,61 +69,97 @@ class MemoryScrambleGame:
         config_frame = tk.Frame(self.root, padx=12, pady=10)
         config_frame.grid(row=0, column=0, sticky="ew")
 
-        tk.Label(config_frame, text="Rows").grid(row=0, column=0, padx=4)
-        tk.Entry(config_frame, textvariable=self.rows_var, width=5).grid(
-            row=0, column=1, padx=4
-        )
+        # Rows: [-] value [+]
+        tk.Button(config_frame, text="Rows ▾", relief=tk.FLAT, bd=0,
+                  font=("Arial", 11)).grid(row=0, column=0, padx=(0, 2))
+        tk.Button(config_frame, text="−", font=("Arial", 14, "bold"), width=2,
+                  command=lambda: self._adjust("rows", -1)).grid(row=0, column=1)
+        self.rows_btn = tk.Button(config_frame, text="4", font=("Arial", 14, "bold"),
+                                   width=3, relief=tk.GROOVE)
+        self.rows_btn.grid(row=0, column=2)
+        tk.Button(config_frame, text="+", font=("Arial", 14, "bold"), width=2,
+                  command=lambda: self._adjust("rows", 1)).grid(row=0, column=3)
 
-        tk.Label(config_frame, text="Columns").grid(row=0, column=2, padx=4)
-        tk.Entry(config_frame, textvariable=self.columns_var, width=5).grid(
-            row=0, column=3, padx=4
-        )
+        # Columns: [-] value [+]
+        tk.Button(config_frame, text="Cols ▾", relief=tk.FLAT, bd=0,
+                  font=("Arial", 11)).grid(row=0, column=4, padx=(16, 2))
+        tk.Button(config_frame, text="−", font=("Arial", 14, "bold"), width=2,
+                  command=lambda: self._adjust("cols", -1)).grid(row=0, column=5)
+        self.cols_btn = tk.Button(config_frame, text="4", font=("Arial", 14, "bold"),
+                                   width=3, relief=tk.GROOVE)
+        self.cols_btn.grid(row=0, column=6)
+        tk.Button(config_frame, text="+", font=("Arial", 14, "bold"), width=2,
+                  command=lambda: self._adjust("cols", 1)).grid(row=0, column=7)
 
-        tk.Label(config_frame, text="Timeout").grid(row=0, column=4, padx=4)
-        tk.Entry(config_frame, textvariable=self.timeout_var, width=6).grid(
-            row=0, column=5, padx=4
-        )
+        # Timeout: [-] value [+]
+        tk.Button(config_frame, text="Time ▾", relief=tk.FLAT, bd=0,
+                  font=("Arial", 11)).grid(row=0, column=8, padx=(16, 2))
+        tk.Button(config_frame, text="−", font=("Arial", 14, "bold"), width=2,
+                  command=lambda: self._adjust("time", -10)).grid(row=0, column=9)
+        self.time_btn = tk.Button(config_frame, text="60", font=("Arial", 14, "bold"),
+                                   width=3, relief=tk.GROOVE)
+        self.time_btn.grid(row=0, column=10)
+        tk.Button(config_frame, text="+", font=("Arial", 14, "bold"), width=2,
+                  command=lambda: self._adjust("time", 10)).grid(row=0, column=11)
 
-        tk.Button(config_frame, text="Start Game", command=self.start_game).grid(
-            row=0, column=6, padx=8
-        )
+        tk.Button(config_frame, text="Start Game", font=("Arial", 14, "bold"),
+                  command=self.start_game).grid(row=0, column=12, padx=(20, 0))
 
         info_frame = tk.Frame(self.root, padx=12)
         info_frame.grid(row=1, column=0, sticky="ew")
 
-        tk.Label(info_frame, textvariable=self.timer_var, font=("Arial", 12, "bold")).grid(
-            row=0, column=0, sticky="w"
-        )
-        tk.Label(info_frame, textvariable=self.moves_var, font=("Arial", 12, "bold")).grid(
-            row=0, column=1, padx=12
-        )
-        tk.Label(info_frame, textvariable=self.status_var).grid(row=0, column=2, padx=16)
+        self.timer_btn = tk.Button(info_frame, text="Time: --", relief=tk.FLAT, bd=0, font=("Arial", 12, "bold"))
+        self.timer_btn.grid(row=0, column=0, sticky="w")
+
+        self.moves_btn = tk.Button(info_frame, text="Moves: 0", relief=tk.FLAT, bd=0, font=("Arial", 12, "bold"))
+        self.moves_btn.grid(row=0, column=1, padx=12)
+
+        self.status_btn = tk.Button(info_frame, text="Press Start Game to begin.", relief=tk.FLAT, bd=0)
+        self.status_btn.grid(row=0, column=2, padx=16)
 
         self.board_frame = tk.Frame(self.root, padx=12, pady=12)
         self.board_frame.grid(row=2, column=0)
 
+    def _adjust(self, field: str, delta: int) -> None:
+        if field == "rows":
+            self.rows_val = max(1, min(10, self.rows_val + delta))
+            self.rows_btn.config(text=str(self.rows_val))
+        elif field == "cols":
+            self.columns_val = max(1, min(10, self.columns_val + delta))
+            self.cols_btn.config(text=str(self.columns_val))
+        elif field == "time":
+            self.timeout_val = max(10, min(600, self.timeout_val + delta))
+            self.time_btn.config(text=str(self.timeout_val))
+
     def start_game(self) -> None:
-        """Read settings, create a new board, and start the countdown."""
+        """Create a new board and start the countdown."""
+        rows = self.rows_val
+        columns = self.columns_val
+        timeout = self.timeout_val
+
         try:
-            rows = int(self.rows_var.get())
-            columns = int(self.columns_var.get())
-            timeout = int(self.timeout_var.get())
             validate_board_size(rows, columns)
-            if timeout <= 0:
-                raise ValueError("Timeout must be a positive number of seconds.")
         except ValueError as error:
             messagebox.showerror("Invalid Configuration", str(error))
             return
 
+        # Stop any previous timer and cancel pending after callbacks
         if self.timer is not None:
             self.timer.stop()
+            self.timer = None
+        if self._flip_back_job is not None:
+            self.root.after_cancel(self._flip_back_job)
+            self._flip_back_job = None
+        self.game_active = False
+        self.waiting_to_hide_cards = False
 
+
+        # Reset game state
         self.board = generate_board(rows, columns)
         self.flipped_cards = []
         self.matched_cards = set()
         self.moves_count = 0
         self._update_moves_label()
-        self.waiting_to_hide_cards = False
         self.game_active = True
 
         self.timer = CountdownTimer(
@@ -135,17 +170,25 @@ class MemoryScrambleGame:
         )
 
         self._render_board(rows, columns)
-        self.status_var.set("Find all matching pairs.")
+        self.status_btn.config(text="Find all matching pairs.")
         self.timer.start()
 
     def _render_board(self, rows: int, columns: int) -> None:
-        for child in self.board_frame.winfo_children():
-            child.destroy()
+        # First: hide ALL existing buttons from the grid
+        for button_row in self.buttons:
+            for button in button_row:
+                button.grid_forget()
 
-        self.buttons = []
+        old_rows = len(self.buttons)
+        old_cols = len(self.buttons[0]) if old_rows > 0 else 0
+
+        # Grow rows if needed
+        while len(self.buttons) < rows:
+            self.buttons.append([])
+
+        # For each row, grow columns if needed
         for row in range(rows):
-            button_row: list[tk.Button] = []
-            for column in range(columns):
+            while len(self.buttons[row]) < columns:
                 button = tk.Button(
                     self.board_frame,
                     text=CARD_BACK_TEXT,
@@ -157,9 +200,22 @@ class MemoryScrambleGame:
                     disabledforeground="black",
                     command=lambda r=row, c=column: self.select_card(r, c),
                 )
-                button.grid(row=row, column=column, padx=4, pady=4)
-                button_row.append(button)
-            self.buttons.append(button_row)
+                self.buttons[row].append(button)
+
+        # Now configure and grid only the buttons we need
+        for row in range(rows):
+            for col in range(columns):
+                self.buttons[row][col].config(
+                    text=CARD_BACK_TEXT,
+                    state=tk.NORMAL,
+                    relief=tk.RAISED,
+                    command=lambda r=row, c=col: self.select_card(r, c),
+                )
+                self.buttons[row][col].grid(row=row, column=col, padx=4, pady=4)
+
+        # Store current active size so select_card works correctly
+        self._active_rows = rows
+        self._active_cols = columns
 
     def select_card(self, row: int, column: int) -> None:
         """Flip a selected card and check for a pair after two selections."""
@@ -191,13 +247,13 @@ class MemoryScrambleGame:
             self.matched_cards.update(self.flipped_cards)
             self._mark_matched_cards()
             self.flipped_cards = []
-            self.status_var.set("Match found.")
+            self.status_btn.config(text="Match found.")
             self._check_for_win()
             return
 
-        self.status_var.set("No match. Try again.")
+        self.status_btn.config(text="No match. Try again.")
         self.waiting_to_hide_cards = True
-        self.root.after(FLIP_BACK_DELAY_MS, self._hide_unmatched_cards)
+        self._flip_back_job = self.root.after(FLIP_BACK_DELAY_MS, self._hide_unmatched_cards)
 
     def _check_for_win(self) -> None:
         total_cards = len(self.board) * len(self.board[0])
@@ -205,13 +261,14 @@ class MemoryScrambleGame:
             self.game_active = False
             if self.timer is not None:
                 self.timer.stop()
-            self.status_var.set("You matched all pairs.")
+            self.status_btn.config(text="You matched all pairs.")
             messagebox.showinfo(
                 "You Win",
                 f"Congratulations! You matched all pairs in {self.moves_count} moves.",
             )
 
     def _hide_unmatched_cards(self) -> None:
+        self._flip_back_job = None
         for row, column in self.flipped_cards:
             self._hide_card(row, column)
 
@@ -246,17 +303,18 @@ class MemoryScrambleGame:
             )
 
     def _update_timer_label(self, remaining_seconds: int) -> None:
-        self.timer_var.set(f"Time: {remaining_seconds}")
+        self.timer_btn.config(text=f"Time: {remaining_seconds}")
 
     def _update_moves_label(self) -> None:
-        self.moves_var.set(f"Moves: {self.moves_count}")
+        self.moves_btn.config(text=f"Moves: {self.moves_count}")
+        self.root.title(f"Memory Scramble Game  |  Moves: {self.moves_count}")
 
     def _handle_timeout(self) -> None:
         if not self.game_active:
             return
 
         self.game_active = False
-        self.status_var.set("Time is up.")
+        self.status_btn.config(text="Time is up.")
         self._disable_all_cards()
         messagebox.showinfo("Game Over", "Time is up. Better luck next round.")
 
