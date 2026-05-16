@@ -68,9 +68,9 @@ TK_SILENCE_DEPRECATION=1 python3 src/main.py
 
 ## Team Members
 
-- Student 1: Name / ID
-- Student 2: Name / ID
-- Student 3: Name / ID
+- Mohamed Medhat Abdulrahman
+- Anas Nasouh Alsbenati
+- Marwan Ahmed Abdelrahman
 
 ## Project Requirements
 
