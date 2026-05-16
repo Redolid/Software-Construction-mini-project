@@ -1,8 +1,70 @@
 # Memory Scramble Game
 
-A beginner-friendly Python/tkinter memory game for a Software Construction Tools assignment. The player chooses the number of rows, columns, and a timeout, then flips cards to find matching pairs before the countdown reaches zero.
+A Python/tkinter memory card-matching game built for a Software Construction Tools course assignment. The player configures the board size and timeout, then flips cards to find matching pairs before the countdown reaches zero.
 
-This repository starts as a playable scaffold. Teammates should still create feature branches, improve their assigned parts, make small commits, and merge through `dev` before the final submission.
+## How to Build and Run
+
+### Prerequisites
+
+- **Python 3.9 or newer** (tested on Python 3.9 on macOS and Python 3.10+ on Windows/Linux)
+- **tkinter** (included with most Python installations)
+- No third-party packages are required
+
+### Steps to Run
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/Software-Construction-mini-project.git
+   cd Software-Construction-mini-project
+   ```
+
+2. **Run the game:**
+
+   ```bash
+   python3 src/main.py
+   ```
+
+   On Windows, use:
+
+   ```bash
+   python src/main.py
+   ```
+
+3. **If tkinter is missing**, install the Python version from [python.org](https://www.python.org/) or install your OS's tkinter package:
+   - **Ubuntu/Debian:** `sudo apt-get install python3-tk`
+   - **macOS:** tkinter is included with the system Python and with python.org installers
+   - **Windows:** tkinter is included with the standard Python installer
+
+### macOS Note
+
+On macOS you may see: `DEPRECATION WARNING: The system version of Tk is deprecated`. This is a cosmetic warning and does not affect gameplay. To suppress it, run:
+
+```bash
+TK_SILENCE_DEPRECATION=1 python3 src/main.py
+```
+
+## How to Play
+
+1. **Configure the board** using the `+` and `−` buttons at the top of the window:
+   - **Rows**: number of rows (1–10)
+   - **Cols**: number of columns (1–10)
+   - **Time**: timeout in seconds (10–600, adjusts by 10)
+   - The total number of cells (rows × columns) must be **even**
+
+2. **Click "Start Game"** to generate the board and start the countdown timer.
+
+3. **Click on cards** to flip them face-up. Select two cards per turn:
+   - If the two cards **match**, they stay face-up
+   - If they **don't match**, they flip back face-down after a short delay
+
+4. **Win condition**: match all pairs before the timer runs out.
+
+5. **Game over**: if the countdown reaches zero, a game-over message is displayed.
+
+6. **Move counter and timer** are displayed in the window title bar: `Memory Scramble Game | Moves: X | Time: Y`
+
+7. **Restart anytime** by adjusting the settings and clicking "Start Game" again.
 
 ## Team Members
 
@@ -12,236 +74,95 @@ This repository starts as a playable scaffold. Teammates should still create fea
 
 ## Project Requirements
 
-- The board is configured using `nRows` and `nColumns`.
-- `nRows * nColumns` must be even.
-- The game creates `board_size / 2` different symbols.
-- Each symbol appears exactly twice.
-- Cards are randomly distributed on the board.
-- The player configures the timeout in seconds.
-- A countdown timer is visible during play.
-- If the timer reaches zero before all matches are found, the game shows a game-over message.
-- The player selects two face-down cards at a time.
-- Matching cards stay face-up.
-- Non-matching cards flip back face-down.
-- Cards use different visual states for hidden, selected, matched, and disabled.
-- The game tracks how many moves the player has used.
-- The game ends successfully when all pairs are matched.
-
-## Technology
-
-- Python 3.10 or newer
-- tkinter GUI
-- No third-party Python packages are required
+| Requirement | Status |
+|---|---|
+| Player configures board size (nRows × nColumns) | ✅ |
+| Board size must be even | ✅ |
+| Generates board_size / 2 different symbols | ✅ |
+| Each symbol appears exactly twice | ✅ |
+| Cards randomly distributed on the board | ✅ |
+| Player configures timeout | ✅ |
+| Countdown timer visible during play | ✅ |
+| Game-over message when timer reaches zero | ✅ |
+| Player selects two face-down cards at a time | ✅ |
+| Matching cards stay face-up | ✅ |
+| Non-matching cards flip back face-down | ✅ |
+| Move counter tracks pair attempts | ✅ |
+| Game ends successfully when all pairs matched | ✅ |
 
 ## Project Structure
 
 ```text
-memory-scramble-game/
-+-- src/
-|   +-- __init__.py
-|   +-- main.py
-|   +-- game.py
-|   +-- board.py
-|   +-- timer.py
-+-- README.md
-+-- requirements.txt
-+-- .gitignore
+Software-Construction-mini-project/
+├── src/
+│   ├── __init__.py      # Package marker
+│   ├── main.py          # Application entry point
+│   ├── game.py          # GUI layout and game flow
+│   ├── board.py         # Board validation and card generation
+│   └── timer.py         # Countdown timer logic
+├── README.md            # This file
+├── CONTRIBUTING_TASKS.md # Contributor task breakdown
+├── PLAN.md              # Team workflow plan
+└── requirements.txt     # Python dependencies (none required)
 ```
 
 ## File Responsibilities
 
 ### `src/main.py`
-
-Starts the tkinter application.
-
-Owner suggestion: integration owner.
-
-Implementation requirements:
-- Create the main window.
-- Load `MemoryScrambleGame`.
-- Start the tkinter event loop.
+Creates the tkinter root window and starts the GUI event loop.
 
 ### `src/game.py`
-
-Contains the GUI and main game flow.
-
-Owner suggestion: UI teammate or integration teammate.
-
-Implementation requirements:
-- Show inputs for rows, columns, and timeout.
-- Render the board as clickable buttons.
-- Allow selecting two face-down cards.
-- Keep matching cards visible.
-- Hide non-matching cards after a short delay.
-- Show win and game-over messages.
+Contains the `MemoryScrambleGame` class — the main GUI and game flow:
+- Configuration bar with +/− buttons for rows, columns, and timeout
+- Board rendering with reusable card buttons
+- Card selection, matching, and flip-back logic
+- Move counter and timer display in the window title
+- Win and game-over message dialogs
 
 ### `src/board.py`
-
-Contains board validation and random card generation.
-
-Owner suggestion: game-logic teammate.
-
-Implementation requirements:
-- Validate positive row and column values.
-- Validate that total card count is even.
-- Generate exactly one pair for each symbol.
-- Shuffle the cards before building the board.
+Board validation and random card generation:
+- Validates positive row/column values and even total card count
+- Generates exactly one pair for each symbol
+- Shuffles cards randomly before building the 2D board
 
 ### `src/timer.py`
+Countdown timer using tkinter's `after()` scheduling:
+- Ticks every second and calls back to update the display
+- Triggers game-over callback when time reaches zero
+- Stops cleanly on win or game restart
 
-Contains countdown timer logic.
+## Git Workflow
 
-Owner suggestion: timer/config teammate.
+- `main` — stable final version
+- `dev` — integration branch
+- `feature/*` — individual feature branches
 
-Implementation requirements:
-- Store remaining seconds.
-- Update the GUI every second.
-- Trigger game-over when the countdown reaches zero.
-- Stop cleanly when the game is won or restarted.
-
-## How to Run
-
-From the project folder:
+### Example commands
 
 ```bash
-python src/main.py
-```
-
-On some systems you may need:
-
-```bash
-python3 src/main.py
-```
-
-If tkinter is missing, install the Python version from [python.org](https://www.python.org/) or install your operating system's tkinter package.
-
-## Suggested Git Workflow
-
-Use `main` as the stable final branch. Use `dev` as the integration branch where completed features are merged before the final release.
-
-Suggested branches:
-
-- `main`: stable final version
-- `dev`: integration branch
-- `feature/ui`: tkinter layout and board buttons
-- `feature/ui-game-flow`: UI states, card matching polish, and game flow review
-- `feature/game-logic`: board generation and matching rules
-- `feature/timer-config`: timeout input and countdown behavior
-
-## Example Git Commands
-
-Create the repository:
-
-```bash
-git init
-git add .
-git commit -m "Initial project structure"
-git branch -M main
-```
-
-Create and push the integration branch:
-
-```bash
-git checkout -b dev
-git push -u origin dev
-```
-
-Create a feature branch:
-
-```bash
+# Create a feature branch
 git checkout dev
-git checkout -b feature/game-logic
-```
+git checkout -b feature/my-feature
 
-Commit a small change:
+# Commit small changes
+git add src/game.py
+git commit -m "Add card matching behavior"
 
-```bash
-git add src/board.py
-git commit -m "Add board validation and generation"
-```
-
-Merge a feature branch into `dev`:
-
-```bash
+# Merge into dev
 git checkout dev
-git merge feature/game-logic
+git merge feature/my-feature
 git push origin dev
-```
 
-Merge final work into `main`:
-
-```bash
+# Final merge to main
 git checkout main
 git merge dev
 git push origin main
 ```
 
-Connect to a public GitHub repository:
-
-```bash
-git remote add origin https://github.com/YOUR-USERNAME/memory-scramble-game.git
-git push -u origin main
-```
-
-## Suggested Small Commit Plan
-
-1. `Initial project structure`
-   - Add `src/`, `README.md`, `requirements.txt`, and `.gitignore`.
-
-2. `Add board validation and generation`
-   - Implement `src/board.py`.
-   - Validate rows, columns, even board size, and maximum supported symbols.
-
-3. `Add countdown timer`
-   - Implement `src/timer.py`.
-   - Add start, stop, tick, and timeout callback behavior.
-
-4. `Build tkinter game layout`
-   - Implement configuration inputs.
-   - Render card buttons.
-
-5. `Add card matching behavior`
-   - Flip selected cards.
-   - Keep matches visible.
-   - Hide non-matches.
-
-6. `Add win and game-over states`
-   - Stop timer when player wins.
-   - Disable board when time runs out.
-
-7. `Update README with run and Git workflow`
-   - Add setup instructions, branch plan, and teammate responsibilities.
-
-## Edge Cases to Handle
-
-- Rows or columns are empty.
-- Rows or columns are not numbers.
-- Rows or columns are zero or negative.
-- `nRows * nColumns` is odd.
-- Board has fewer than two cards.
-- Requested board is larger than the available symbol list.
-- Timeout is empty, non-numeric, zero, or negative.
-- Player clicks the same card twice.
-- Player clicks a third card while two non-matching cards are waiting to flip back.
-- Player restarts the game while a timer is already running.
-- Timer reaches zero at the same time the player finds the final match.
-
 ## Team Work Split
 
-Detailed contributor tasks are available in `CONTRIBUTING_TASKS.md`.
+- **Teammate A** (`feature/game-logic`): Owns `src/board.py` — board validation and pair generation
+- **Teammate B** (`feature/timer-config`): Owns `src/timer.py` — countdown and timeout behavior
+- **Teammate C** (`feature/ui`): Owns `src/game.py` — tkinter layout and card-click behavior
 
-The recommended team workflow is available in `PLAN.md`.
-
-- Teammate A: `feature/game-logic`
-  - Owns `src/board.py`.
-  - Tests board validation and random pair generation.
-
-- Teammate B: `feature/timer-config`
-  - Owns `src/timer.py`.
-  - Tests countdown, restart, and timeout behavior.
-
-- Teammate C: `feature/ui`
-  - Owns `src/game.py`.
-  - Builds the tkinter layout and card-click behavior.
-
-Everyone should review changes through pull requests before merging into `dev`.
+Detailed contributor tasks are in `CONTRIBUTING_TASKS.md`. Team workflow is in `PLAN.md`.
