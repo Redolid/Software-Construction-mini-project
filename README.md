@@ -159,10 +159,5 @@ git merge dev
 git push origin main
 ```
 
-## Team Work Split
-
-- **Teammate A** (`feature/game-logic`): Owns `src/board.py` — board validation and pair generation
-- **Teammate B** (`feature/timer-config`): Owns `src/timer.py` — countdown and timeout behavior
-- **Teammate C** (`feature/ui`): Owns `src/game.py` — tkinter layout and card-click behavior
 
 Detailed contributor tasks are in `CONTRIBUTING_TASKS.md`. Team workflow is in `PLAN.md`.
