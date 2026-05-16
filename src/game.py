@@ -189,6 +189,7 @@ class MemoryScrambleGame:
         # For each row, grow columns if needed
         for row in range(rows):
             while len(self.buttons[row]) < columns:
+                col_idx = len(self.buttons[row])
                 button = tk.Button(
                     self.board_frame,
                     text=CARD_BACK_TEXT,
@@ -198,7 +199,7 @@ class MemoryScrambleGame:
                     bg=CARD_HIDDEN_BG,
                     activebackground=CARD_HIDDEN_BG,
                     disabledforeground="black",
-                    command=lambda r=row, c=column: self.select_card(r, c),
+                    command=lambda r=row, c=col_idx: self.select_card(r, c),
                 )
                 self.buttons[row].append(button)
 
