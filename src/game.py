@@ -22,7 +22,7 @@ Suggested teammate owner:
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 try:
     from .board import generate_board, validate_board_size
@@ -42,7 +42,8 @@ class MemoryScrambleGame:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Memory Scramble Game")
-        self.root.resizable(False, False)
+        self.root.geometry("600x550")
+        self.root.minsize(600, 550)
 
         self.rows_var = tk.StringVar(value="4")
         self.columns_var = tk.StringVar(value="4")
@@ -63,41 +64,26 @@ class MemoryScrambleGame:
         self._build_layout()
 
     def _build_layout(self) -> None:
+        # --- Config bar ---
         config_frame = tk.Frame(self.root, padx=12, pady=10)
-        config_frame.grid(row=0, column=0, sticky="ew")
+        config_frame.pack(side=tk.TOP, fill=tk.X)
 
-        tk.Label(config_frame, text="Rows").grid(row=0, column=0, padx=4)
-        tk.Entry(config_frame, textvariable=self.rows_var, width=5).grid(
-            row=0, column=1, padx=4
-        )
+        tk.Label(config_frame, text="Rows").pack(side=tk.LEFT, padx=4)
+        tk.Entry(config_frame, textvariable=self.rows_var, width=5).pack(side=tk.LEFT, padx=4)
 
-        tk.Label(config_frame, text="Columns").grid(row=0, column=2, padx=4)
-        tk.Entry(config_frame, textvariable=self.columns_var, width=5).grid(
-            row=0, column=3, padx=4
-        )
+        tk.Label(config_frame, text="Columns").pack(side=tk.LEFT, padx=4)
+        tk.Entry(config_frame, textvariable=self.columns_var, width=5).pack(side=tk.LEFT, padx=4)
 
-        tk.Label(config_frame, text="Timeout").grid(row=0, column=4, padx=4)
-        tk.Entry(config_frame, textvariable=self.timeout_var, width=6).grid(
-            row=0, column=5, padx=4
-        )
+        tk.Label(config_frame, text="Timeout").pack(side=tk.LEFT, padx=4)
+        tk.Entry(config_frame, textvariable=self.timeout_var, width=6).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(config_frame, text="Start Game", command=self.start_game).grid(
-            row=0, column=6, padx=8
-        )
+        tk.Button(config_frame, text="Start Game", command=self.start_game).pack(side=tk.LEFT, padx=8)
 
-        info_frame = tk.Frame(self.root, padx=12)
-        info_frame.grid(row=1, column=0, sticky="ew")
 
-        tk.Label(info_frame, textvariable=self.timer_var, font=("Arial", 12, "bold")).grid(
-            row=0, column=0, sticky="w"
-        )
-        tk.Label(info_frame, textvariable=self.moves_var, font=("Arial", 12, "bold")).grid(
-            row=0, column=1, padx=12
-        )
-        tk.Label(info_frame, textvariable=self.status_var).grid(row=0, column=2, padx=16)
-
+        # --- Board area ---
         self.board_frame = tk.Frame(self.root, padx=12, pady=12)
-        self.board_frame.grid(row=2, column=0)
+        self.board_frame.pack(side=tk.TOP, expand=True)
+
 
     def start_game(self) -> None:
         """Read settings, create a new board, and start the countdown."""
@@ -225,10 +211,15 @@ class MemoryScrambleGame:
         )
 
     def _update_timer_label(self, remaining_seconds: int) -> None:
-        self.timer_var.set(f"Time: {remaining_seconds}")
+        self.remaining_seconds = remaining_seconds
+        self._update_title()
 
     def _update_moves_label(self) -> None:
-        self.moves_var.set(f"Moves: {self.moves_count}")
+        self._update_title()
+
+    def _update_title(self) -> None:
+        time_str = getattr(self, 'remaining_seconds', int(self.timeout_var.get()))
+        self.root.title(f"Memory Scramble Game  |  Moves: {self.moves_count}  |  Time: {time_str}")
 
     def _handle_timeout(self) -> None:
         if not self.game_active:
