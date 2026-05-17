@@ -15,7 +15,7 @@ A Python/tkinter memory card-matching game built for a Software Construction Too
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/YOUR-USERNAME/Software-Construction-mini-project.git
+   git clone https://github.com/Redolid/Software-Construction-mini-project.git
    cd Software-Construction-mini-project
    ```
 
@@ -100,11 +100,26 @@ Software-Construction-mini-project/
 │   ├── game.py          # GUI layout and game flow
 │   ├── board.py         # Board validation and card generation
 │   └── timer.py         # Countdown timer logic
+├── tests/
+│   ├── __init__.py      # Package marker
+│   ├── test_board.py    # Unit tests for board.py
+│   ├── test_timer.py    # Unit tests for timer.py
+│   └── test_game.py     # Unit tests for game.py
 ├── README.md            # This file
 ├── CONTRIBUTING_TASKS.md # Contributor task breakdown
 ├── PLAN.md              # Team workflow plan
 └── requirements.txt     # Python dependencies (none required)
 ```
+
+## How to Run Tests
+
+Run all 86 unit tests from the project root:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+On macOS/Linux, use `python3` instead of `python` if needed.
 
 ## File Responsibilities
 
@@ -130,6 +145,15 @@ Countdown timer using tkinter's `after()` scheduling:
 - Ticks every second and calls back to update the display
 - Triggers game-over callback when time reaches zero
 - Stops cleanly on win or game restart
+
+### `tests/test_board.py`
+28 tests covering board size validation (even constraint, zero/negative values, symbol limit) and board generation (correct dimensions, symbol pairing, randomness).
+
+### `tests/test_timer.py`
+15 tests covering timer initialization, start/stop behavior, tick decrement, on_finish callback at zero, and restart after stop.
+
+### `tests/test_game.py`
+43 tests covering game defaults, configuration clamping, card selection logic, matching/non-matching pairs, win condition, timeout/game-over, and move counter.
 
 ## Git Workflow
 
